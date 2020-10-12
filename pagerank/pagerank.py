@@ -127,25 +127,40 @@ def iterate_pagerank(corpus, damping_factor):
     # Use the formula to calculate new PageRank values for each page, based on the previous PageRank values
     has_converged = False
     while not has_converged:
+
+        # Assume that the PageRank values have converged unless we find a page for which this isn't true
         has_converged = True
 
         # Keep repeating this process, calculating a new set of PageRank values for each page based on the previous set of PageRank values.
-        for key in corpus.keys():
+        for current_page in corpus.keys():
 
+            # Find all of the pages which link to the current page:
+            pages_which_link_to_current = []
+            for possible_linking_page in corpus.keys():
+                if current_page in corpus[possible_linking_page]:
+                    pages_which_link_to_current.append(possible_linking_page)
+
+            # Calculate the right-hand side of the PR(p) equation per the specification
             sum_of_inbound_pagerank_values = 0
-            for inbound_key in corpus.keys():
-                if key in corpus[inbound_key]:
-                    sum_of_inbound_pagerank_values += page_ranks[inbound_key] / len(corpus[inbound_key])
-            next_value = ((1.0 - damping_factor) / num_corpus_pages) + damping_factor * sum_of_inbound_pagerank_values
+            for possible_linking_page in corpus.keys():
+                num_pages_linking_to_current_page = 0
+
+                # A page that has no links at all should be interpreted as having one link for every page in the corpus (including itself)
+                if current_page in corpus[possible_linking_page] or len(corpus[possible_linking_page]) is 0:
+                    # Then we've found a page which links into this current page.
+                    num_pages_linking_to_current_page += 1
+                    sum_of_inbound_pagerank_values += page_ranks[possible_linking_page] / len(corpus[possible_linking_page])
+                
+            updated_pagerank_value = ((1.0 - damping_factor) / num_corpus_pages) + damping_factor * sum_of_inbound_pagerank_values
 
             # Eventually the PageRank values will converge (i.e., not change by more than a small threshold with each iteration).
             # This process should repeat until PageRank values converge.
-            delta = abs(page_ranks[key] - next_value)
+            delta = abs(page_ranks[current_page] - updated_pagerank_value)
             if delta >= 0.0001:
                 has_converged = False
 
             # Assign the new PageRank value
-            page_ranks[key] = next_value
+            page_ranks[current_page] = updated_pagerank_value
                 
     return page_ranks
 
