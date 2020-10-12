@@ -144,14 +144,16 @@ def iterate_pagerank(corpus, damping_factor):
                 # If the current page is in the set of links from another page, then we use it for further calculation
                 if current_page in corpus[possible_linking_page]:
                     sum_of_inbound_pagerank_link_values += page_ranks[possible_linking_page] / len(links_present_on_page)
-            
+            equation_right_hand_side_value =  damping_factor * sum_of_inbound_pagerank_link_values
+
             # Calculate the updated PageRank value as per the specification formula:
-            new_rank_value = ((1.0 - damping_factor) / num_corpus_pages) + damping_factor * sum_of_inbound_pagerank_link_values
+            equation_left_hand_side_value = (1.0 - damping_factor) / num_corpus_pages
+            new_rank_value = equation_left_hand_side_value + equation_right_hand_side_value
 
             # Eventually the PageRank values will converge (i.e., not change by more than a small threshold with each iteration).
             # This process should repeat until PageRank values converge.
             delta = abs(page_ranks[current_page] - new_rank_value)
-            if delta >= 0.0001:
+            if delta > 0.0001:
                 has_converged = False
 
             # Assign the new PageRank value
