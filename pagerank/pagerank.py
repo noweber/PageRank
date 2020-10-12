@@ -60,6 +60,8 @@ def transition_model(corpus, page, damping_factor):
     outbound_links = corpus[page]
     num_outbound_pages = len(outbound_links)
     num_corpus_pages = len(corpus.keys())
+
+    # Create a transition model from the given page to all other pages in the corpus:
     model = {}
     for key in corpus.keys():
         
@@ -136,7 +138,7 @@ def iterate_pagerank(corpus, damping_factor):
             # Calculate the right-hand side of the PR(p) equation per the specification
             sum_of_inbound_pagerank_link_values = 0
             for possible_linking_page in corpus.keys():
-                
+
                 # If a page that has no links at all should be interpreted as having one link for every page in the corpus (including itself)
                 links_present_on_page = corpus[possible_linking_page]
                 if len(links_present_on_page) is 0:
@@ -161,6 +163,7 @@ def iterate_pagerank(corpus, damping_factor):
             page_ranks[current_page] = new_rank_value
                 
     return page_ranks
+
 
 if __name__ == "__main__":
     main()
