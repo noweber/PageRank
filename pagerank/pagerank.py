@@ -136,6 +136,7 @@ def iterate_pagerank(corpus, damping_factor):
             # Calculate the right-hand side of the PR(p) equation per the specification
             sum_of_inbound_pagerank_link_values = 0
             for possible_linking_page in corpus.keys():
+                
                 # If a page that has no links at all should be interpreted as having one link for every page in the corpus (including itself)
                 links_present_on_page = corpus[possible_linking_page]
                 if len(links_present_on_page) is 0:
