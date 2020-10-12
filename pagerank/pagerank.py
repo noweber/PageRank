@@ -108,6 +108,16 @@ def sample_pagerank(corpus, damping_factor, n):
     return page_ranks
 
 
+def get_parent_link_pages(corpus, page):
+    """
+    Returns a list of pages from the corpus which contain links to the argument page.
+    """
+    parent_link_pages = []
+    for possible_linking_page in corpus.keys():
+        if page in corpus[possible_linking_page]:
+            parent_link_pages.append(possible_linking_page)
+    return parent_link_pages
+
 def iterate_pagerank(corpus, damping_factor):
     """
     Return PageRank values for each page by iteratively updating
@@ -134,24 +144,18 @@ def iterate_pagerank(corpus, damping_factor):
         # Keep repeating this process, calculating a new set of PageRank values for each page based on the previous set of PageRank values.
         for current_page in corpus.keys():
 
-            # Find all of the pages which link to the current page:
-            pages_which_link_to_current = []
-            for possible_linking_page in corpus.keys():
-                if current_page in corpus[possible_linking_page]:
-                    pages_which_link_to_current.append(possible_linking_page)
-
             # Calculate the right-hand side of the PR(p) equation per the specification
-            sum_of_inbound_pagerank_values = 0
-            for possible_linking_page in corpus.keys():
-                num_pages_linking_to_current_page = 0
+            sum_of_inbound_pagerank_link_values = 0
 
-                # A page that has no links at all should be interpreted as having one link for every page in the corpus (including itself)
-                if current_page in corpus[possible_linking_page] or len(corpus[possible_linking_page]) is 0:
-                    # Then we've found a page which links into this current page.
-                    num_pages_linking_to_current_page += 1
-                    sum_of_inbound_pagerank_values += page_ranks[possible_linking_page] / len(corpus[possible_linking_page])
-                
-            updated_pagerank_value = ((1.0 - damping_factor) / num_corpus_pages) + damping_factor * sum_of_inbound_pagerank_values
+            for possible_linking_page in corpus.keys():
+                # If a page that has no links at all should be interpreted as having one link for every page in the corpus (including itself)
+                # Or if the current page is in the set of links for another page
+                if len(corpus[possible_linking_page]) is 0 or current_page in corpus[possible_linking_page]:
+                    number_of_links_present_on_page = len(corpus[possible_linking_page])
+                    sum_of_inbound_pagerank_link_values += page_ranks[possible_linking_page] / number_of_links_present_on_page
+            
+            # Calculate the updated PageRank value as per the specification formula:
+            updated_pagerank_value = ((1.0 - damping_factor) / num_corpus_pages) + damping_factor * sum_of_inbound_pagerank_link_values
 
             # Eventually the PageRank values will converge (i.e., not change by more than a small threshold with each iteration).
             # This process should repeat until PageRank values converge.
